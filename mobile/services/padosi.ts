@@ -26,7 +26,7 @@ export interface Category {
   icon: string;
   comingSoon: boolean;
   kinds: string[];
-  services: string[];
+  servicesByKind: Record<string, string[]>;
 }
 
 export interface ServiceRequest {

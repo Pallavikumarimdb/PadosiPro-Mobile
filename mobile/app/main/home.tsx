@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Linking, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Chip, ErrorBanner, Screen } from '../../components/ui';
+import { Chip, ErrorBanner, MicroLabel, Screen } from '../../components/ui';
 import { taskService, type Category } from '../../services/padosi';
+import { searchCatalog, type Suggestion } from '../../services/searchIndex';
 import { useAuth } from '../../store/AuthContext';
 import { iconFor } from '../../utils/icons';
 
@@ -20,6 +21,42 @@ export default function Home() {
   const [tasks, setTasks] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const results = useMemo(() => searchCatalog(query, tasks), [query, tasks]);
+  const dropdown = submitted ? [] : results.slice(0, 6);
+  const best = submitted && query.trim() ? results[0] : undefined;
+  // Other possibilities prefer a different category than the best match,
+  // so "travel insurance" surfaces the Insurance rows instead of more Travel rows.
+  const others = useMemo(() => {
+    if (!submitted || !query.trim() || results.length < 2) return [];
+    const [first, ...rest] = results;
+    const diff = rest.filter((r) => r.category !== first.category);
+    const same = rest.filter((r) => r.category === first.category);
+    return [...diff, ...same].slice(0, 2);
+  }, [submitted, query, results]);
+
+  function onChangeQuery(v: string) {
+    setQuery(v);
+    setSubmitted(false);
+  }
+
+  function submitSearch() {
+    if (query.trim()) setSubmitted(true);
+  }
+
+  function clearSearch() {
+    setQuery('');
+    setSubmitted(false);
+  }
+
+  function goToDetails(s: Suggestion) {
+    router.push({
+      pathname: '/main/request-details',
+      params: { category: s.category, helpKind: s.helpKind ?? '', service: s.service ?? '' },
+    });
+  }
 
   async function load() {
     setLoading(true);
@@ -54,14 +91,94 @@ export default function Home() {
         </View>
 
         <Text className="mt-6 text-[20px] font-bold text-ink">What do you need help with?</Text>
-        <Pressable
-          onPress={() => router.push('/main/categories')}
+        <View
           className="mt-3 flex-row items-center rounded-xl border border-line bg-card px-4"
           style={{ height: 52 }}
         >
           <Ionicons name="search-outline" size={18} color="#94A3B8" />
-          <Text className="ml-2 text-[14px] text-faint">AC leaking, cook for weekends...</Text>
-        </Pressable>
+          <TextInput
+            value={query}
+            onChangeText={onChangeQuery}
+            onSubmitEditing={submitSearch}
+            placeholder="AC leaking, cook for weekends..."
+            placeholderTextColor="#94A3B8"
+            returnKeyType="search"
+            className="ml-2 flex-1 text-[14px] text-ink"
+          />
+          {query ? (
+            <Pressable onPress={clearSearch} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            </Pressable>
+          ) : null}
+        </View>
+
+        {dropdown.length > 0 ? (
+          <View className="mt-2 rounded-xl border border-line bg-card px-4 py-1">
+            {dropdown.map((s, i) => (
+              <Pressable
+                key={s.phrase}
+                onPress={() => {
+                  setQuery(s.phrase);
+                  setSubmitted(true);
+                }}
+                className={`flex-row items-center py-3 ${i < dropdown.length - 1 ? 'border-b border-line' : ''}`}
+              >
+                <Ionicons name="search-outline" size={16} color="#64748B" />
+                <Text className="ml-2.5 flex-1 text-[14px] text-ink">{s.phrase}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
+
+        {submitted && query.trim() ? (
+          <View className="mt-2 rounded-xl border border-line bg-card p-4">
+            {best ? (
+              <>
+                <MicroLabel>Best match</MicroLabel>
+                <View className="rounded-xl bg-mint p-4">
+                  <Text className="text-center text-[15px] font-bold text-ink">{best.phrase}</Text>
+                  <Pressable
+                    onPress={() => goToDetails(best)}
+                    className="mt-3 h-12 flex-row items-center justify-center rounded-xl bg-primary"
+                  >
+                    <Text className="text-[15px] font-bold text-white">Continue</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#fff" style={{ marginLeft: 6 }} />
+                  </Pressable>
+                </View>
+                {best.diyLabel && best.diyUrl ? (
+                  <Pressable onPress={() => Linking.openURL(best.diyUrl as string)} className="mt-3 flex-row items-center" hitSlop={8}>
+                    <Ionicons name="open-outline" size={15} color="#0C5B40" />
+                    <Text className="ml-1.5 flex-1 text-[13px] font-semibold text-primary">{best.diyLabel}</Text>
+                  </Pressable>
+                ) : null}
+              </>
+            ) : null}
+            {others.length > 0 ? (
+              <View className="mt-3">
+                <MicroLabel>Other possibilities</MicroLabel>
+                {others.map((o) => (
+                  <Pressable
+                    key={o.phrase}
+                    onPress={() => goToDetails(o)}
+                    className="flex-row items-center justify-between border-t border-line py-3"
+                  >
+                    <Text className="flex-1 text-[14px] text-ink">{o.phrase}</Text>
+                    <Ionicons name="chevron-forward" size={17} color="#94A3B8" />
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+            <Pressable
+              onPress={() => router.push('/main/categories')}
+              className="flex-row items-center justify-between border-t border-line py-3"
+            >
+              <Text className="flex-1 text-[13px] font-semibold text-primary">
+                Not what you meant? Tell us in your own words
+              </Text>
+              <Ionicons name="arrow-forward" size={16} color="#0C5B40" />
+            </Pressable>
+          </View>
+        ) : null}
 
         <Text className="mb-2 mt-6 text-[12px] font-bold uppercase tracking-widest text-muted">
           Popular with families like yours

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { BackButton, Chip, ErrorBanner, MicroLabel, PrimaryButton, Screen } from '../../components/ui';
@@ -8,13 +8,14 @@ import { iconFor } from '../../utils/icons';
 
 /** Screenshots 6-8 — Task selection: expandable categories, help-kind + service chips. */
 export default function Categories() {
-  const { focus } = useLocalSearchParams<{ focus?: string }>();
+  const { focus, q } = useLocalSearchParams<{ focus?: string; q?: string }>();
   const [tasks, setTasks] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [kinds, setKinds] = useState<Record<string, string>>({});
   const [services, setServices] = useState<Record<string, string>>({});
+  const [query, setQuery] = useState(q ?? '');
 
   async function load() {
     setLoading(true);
@@ -36,6 +37,33 @@ export default function Categories() {
   useEffect(() => {
     if (focus) setOpen(focus);
   }, [focus]);
+
+  useEffect(() => {
+    if (q) setQuery(q);
+  }, [q]);
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return tasks;
+    return tasks.filter((t) => {
+      const hay = [
+        t.title,
+        t.description,
+        ...(t.kinds ?? []),
+        ...Object.values(t.servicesByKind ?? {}).flat(),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [tasks, query]);
+
+  // When searching, auto-expand the first match so options are visible.
+  useEffect(() => {
+    if (query.trim() && filtered.length > 0 && !filtered.some((t) => t.title === open)) {
+      setOpen(filtered[0].title);
+    }
+  }, [query, filtered, open]);
 
   const selection = useMemo(() => {
     if (!open) return null;
@@ -68,13 +96,45 @@ export default function Categories() {
           <ActivityIndicator size="large" color="#0C5B40" />
         </View>
       ) : (
-        <ScrollView className="mt-4 flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView className="mt-4 flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <ErrorBanner message={error} />
-          {tasks.map((t) => {
+          <View
+            className="mb-3 flex-row items-center rounded-xl border border-line bg-card px-4"
+            style={{ height: 52 }}
+          >
+            <Ionicons name="search-outline" size={18} color="#94A3B8" />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search services..."
+              placeholderTextColor="#94A3B8"
+              returnKeyType="search"
+              className="ml-2 flex-1 text-[14px] text-ink"
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery('')} hitSlop={8}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </Pressable>
+            ) : null}
+          </View>
+          {filtered.length === 0 ? (
+            <View className="items-center rounded-xl border border-line bg-card p-6">
+              <Text className="text-[15px] font-bold text-ink">No matches for “{query.trim()}”</Text>
+              <Text className="mt-1 text-center text-[13px] text-muted">
+                Try a different word, or browse everything below.
+              </Text>
+              <Pressable onPress={() => setQuery('')} className="mt-3" hitSlop={8}>
+                <Text className="text-sm font-semibold text-primary">Clear search</Text>
+              </Pressable>
+            </View>
+          ) : null}
+          {filtered.map((t) => {
             const expanded = open === t.title;
             // Defensive: older API responses may omit these arrays — never crash, just hide the groups.
             const kindList = t.kinds ?? [];
-            const serviceList = t.services ?? [];
+            // Services depend on the selected help-kind (each kind has its own list).
+            const selectedKind = kinds[t.title];
+            const serviceList = ((t.servicesByKind ?? {})[selectedKind] ?? []);
             return (
               <Pressable
                 key={t.title}
@@ -110,7 +170,10 @@ export default function Categories() {
                               key={k}
                               label={k}
                               selected={kinds[t.title] === k}
-                              onPress={() => setKinds((p) => ({ ...p, [t.title]: k }))}
+                              onPress={() => {
+                                setKinds((p) => ({ ...p, [t.title]: k }));
+                                setServices((p) => ({ ...p, [t.title]: '' }));
+                              }}
                             />
                           ))}
                         </View>

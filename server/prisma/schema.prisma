@@ -60,8 +60,8 @@ model Task {
   description String
   icon        String
   comingSoon  Boolean  @default(false)
-  kinds       String[] @default([])
-  services    String[] @default([])
+  kinds          String[] @default([])
+  servicesByKind Json     @default("{}")
   createdAt   DateTime @default(now())
 }
 

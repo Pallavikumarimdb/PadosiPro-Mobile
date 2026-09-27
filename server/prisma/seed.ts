@@ -1,14 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { TASKS } from '../src/services/tasks.js';
+import { TASKS, toTaskRow } from '../src/services/tasks.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
   for (const t of TASKS) {
+    const row = toTaskRow(t);
     await prisma.task.upsert({
-      where: { title: t.title },
-      update: { description: t.description, icon: t.icon, comingSoon: t.comingSoon, kinds: t.kinds, services: t.services },
-      create: { title: t.title, description: t.description, icon: t.icon, comingSoon: t.comingSoon, kinds: t.kinds, services: t.services },
+      where: { title: row.title },
+      update: { description: row.description, icon: row.icon, comingSoon: row.comingSoon, kinds: row.kinds, servicesByKind: row.servicesByKind },
+      create: { ...row },
     });
   }
   console.log(`Seeded ${TASKS.length} tasks`);

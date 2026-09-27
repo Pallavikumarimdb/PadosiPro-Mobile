@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
-import { TASKS } from '../services/tasks.js';
+import { TASKS, toTaskRow } from '../services/tasks.js';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 
 export const taskRouter = Router();
@@ -16,8 +16,8 @@ const requestSchema = z.object({
 
 taskRouter.get('/tasks', async (_req, res) => {
   const dbTasks = await prisma.task.findMany({ orderBy: { createdAt: 'asc' } }).catch(() => []);
-  // kinds/services now live in Postgres; fall back to the built-in catalog only if the table is empty.
-  const tasks = dbTasks.length ? dbTasks : TASKS;
+  // Catalog lives in Postgres; fall back to the built-in copy only if the table is empty.
+  const tasks = dbTasks.length ? dbTasks : TASKS.map(toTaskRow);
   return res.json({ ok: true, tasks });
 });
 
