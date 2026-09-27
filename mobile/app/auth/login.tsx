@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
-import { ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
+import { BottomBar, ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
 import { authService } from '../../services/padosi';
 
 /** Login: identifier (email or mobile) -> OTP is sent -> otp screen. */
@@ -58,7 +58,7 @@ export default function Login() {
         </View>
         <ErrorBanner message={serverError} />
       </ScrollView>
-      <View className="px-5 pb-6">
+      <BottomBar>
         <PrimaryButton title="Get OTP" loading={loading} loadingTitle="Sending OTP..." onPress={onLogin} />
         <View className="mt-4 flex-row justify-center">
           <Text className="text-sm text-muted">New here? </Text>
@@ -66,7 +66,7 @@ export default function Login() {
             Create an account
           </Link>
         </View>
-      </View>
+      </BottomBar>
     </KeyboardAvoidingView>
   );
 }

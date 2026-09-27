@@ -11,7 +11,7 @@ export function buildApp() {
   app.use(cors());
   app.use(express.json({ limit: '256kb' }));
 
-  app.get('/health', (_req, res) => res.json({ ok: true, service: 'padosipro-backend' }));
+  app.get('/health', (_req, res) => res.json({ ok: true, service: 'padosipro-server' }));
 
   app.use(authRouter);
   app.use(profileRouter);

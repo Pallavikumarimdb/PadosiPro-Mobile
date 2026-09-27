@@ -36,17 +36,26 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   const token = await getToken();
   let res: Response;
+  // Never hang forever on unreachable hosts (e.g. wrong LAN IP / firewall drop).
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
   try {
     res = await fetch(url, {
       ...options,
+      signal: ctrl.signal,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers ?? {}),
       },
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error('Request timed out. The backend is not reachable at this address — check the IP/port and retry.');
+    }
     throw new Error('Cannot reach the server. Check your connection and that the backend is running, then retry.');
+  } finally {
+    clearTimeout(timer);
   }
   const body = (await res.json().catch(() => ({}))) as T & ApiError;
   if (!res.ok || (body as ApiError).ok === false) {

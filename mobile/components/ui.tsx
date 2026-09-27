@@ -7,9 +7,22 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+
+/* ---------- BottomBar: bottom CTA area that clears Android's system nav bar ---------- */
+export function BottomBar({ children }: { children: ReactNode }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View
+      className="bg-canvas px-5 pt-2"
+      style={{ paddingBottom: Math.max(insets.bottom, 20) }}
+    >
+      {children}
+    </View>
+  );
+}
 
 /* ---------- Screen: safe-area + consistent horizontal padding ---------- */
 export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {

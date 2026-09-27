@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BackButton, ErrorBanner, Logo, OtpInput, PrimaryButton } from '../../components/ui';
+import { BackButton, BottomBar, ErrorBanner, Logo, OtpInput, PrimaryButton } from '../../components/ui';
 import { authService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
 
@@ -93,9 +93,9 @@ export default function Otp() {
           ) : null}
         </View>
       </ScrollView>
-      <View className="px-5 pb-6">
+      <BottomBar>
         <PrimaryButton title="Verify" loading={verifying} loadingTitle="Verifying..." onPress={onVerify} />
-      </View>
+      </BottomBar>
     </KeyboardAvoidingView>
   );
 }

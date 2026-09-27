@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
-import { ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
+import { BottomBar, ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
 import { validateWelcome } from '../../utils/validation';
 import { authService } from '../../services/padosi';
 
@@ -31,6 +31,9 @@ export default function Welcome() {
       setLoading(false);
     }
   }
+
+  // Button stays disabled until both fields are valid (matches the muted CTA in the reference).
+  const isFormValid = Object.keys(validateWelcome(mobile, email)).length === 0;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-canvas">
@@ -66,15 +69,15 @@ export default function Welcome() {
         </View>
         <ErrorBanner message={serverError} />
       </ScrollView>
-      <View className="px-5 pb-6">
-        <PrimaryButton title="Get OTP" loading={loading} loadingTitle="Sending OTP..." onPress={onGetOtp} />
+      <BottomBar>
+        <PrimaryButton title="Get OTP" loading={loading} loadingTitle="Sending OTP..." onPress={onGetOtp} disabled={!isFormValid} />
         <View className="mt-4 flex-row justify-center">
           <Text className="text-sm text-muted">Already registered? </Text>
           <Link href="/auth/login" className="text-sm font-semibold text-primary">
             Log in
           </Link>
         </View>
-      </View>
+      </BottomBar>
     </KeyboardAvoidingView>
   );
 }

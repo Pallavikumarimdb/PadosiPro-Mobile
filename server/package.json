@@ -13,6 +13,9 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "test": "tsx --test src/utils/otp.test.ts"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

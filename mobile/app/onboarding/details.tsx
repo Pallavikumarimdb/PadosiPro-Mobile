@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { ErrorBanner, Field, PrimaryButton } from '../../components/ui';
+import { BottomBar, ErrorBanner, Field, PrimaryButton } from '../../components/ui';
 import { validateOnboarding } from '../../utils/validation';
 import { profileService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
@@ -106,12 +106,12 @@ export default function Details() {
         <ErrorBanner message={serverError} />
         <View className="h-2" />
       </ScrollView>
-      <View className="px-5 pb-6">
+      <BottomBar>
         {touched && errors.fullName ? (
           <Text className="mb-2 text-center text-[13px] text-muted">{errors.fullName}</Text>
         ) : null}
         <PrimaryButton title="Continue" loading={saving} loadingTitle="Saving..." onPress={onContinue} />
-      </View>
+      </BottomBar>
     </KeyboardAvoidingView>
   );
 }
