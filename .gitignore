@@ -1,0 +1,30 @@
+# Deps
+node_modules/
+
+# Env / secrets (per-app .env.example files are committed, real .env never is)
+.env
+.env.local
+*.pem
+*.key
+
+# Builds
+dist/
+build/
+.expo/
+web-build/
+
+# Prisma
+server/prisma/migrations/**/migration.sql.lock
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+/ss

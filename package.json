@@ -1,0 +1,23 @@
+{
+  "name": "padosipro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PadosiPro take-home monorepo: Expo mobile app + Express API + PostgreSQL",
+  "workspaces": ["mobile", "server"],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently -n server,mobile -c green,cyan \"npm run dev --workspace=server\" \"npm run start --workspace=mobile\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:mobile": "npm run start --workspace=mobile",
+    "test:server": "npm test --workspace=server",
+    "typecheck": "npm run typecheck --workspaces",
+    "typecheck:server": "npm run typecheck --workspace=server",
+    "typecheck:mobile": "npm run typecheck --workspace=mobile",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:seed": "npm run prisma:seed --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

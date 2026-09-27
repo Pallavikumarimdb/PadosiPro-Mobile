@@ -1,0 +1,37 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { prisma } from '../lib/prisma.js';
+import { TASKS } from '../services/tasks.js';
+import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+
+export const taskRouter = Router();
+
+const requestSchema = z.object({
+  category: z.string().min(1, 'Pick a category'),
+  service: z.string().optional().nullable(),
+  helpKind: z.string().optional().nullable(),
+  urgency: z.string().optional().nullable(),
+  details: z.string().optional().nullable(),
+});
+
+taskRouter.get('/tasks', async (_req, res) => {
+  const dbTasks = await prisma.task.findMany().catch(() => []);
+  const tasks = dbTasks.length
+    ? dbTasks.map((t: { title: string; description: string; icon: string }) => ({ ...t, kinds: [], services: [] }))
+    : TASKS;
+  return res.json({ ok: true, tasks });
+});
+
+taskRouter.get('/requests', authMiddleware, async (req: AuthRequest, res) => {
+  const requests = await prisma.serviceRequest.findMany({
+    where: { userId: req.user!.sub }, orderBy: { createdAt: 'desc' },
+  });
+  return res.json({ ok: true, requests });
+});
+
+taskRouter.post('/requests', authMiddleware, async (req: AuthRequest, res) => {
+  const parsed = requestSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues[0].message });
+  const created = await prisma.serviceRequest.create({ data: { userId: req.user!.sub, ...parsed.data } });
+  return res.status(201).json({ ok: true, message: 'Request received. Your Lifestyle Manager will take it from here.', request: created });
+});
