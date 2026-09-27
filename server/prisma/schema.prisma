@@ -18,6 +18,7 @@ model User {
   otps            OtpCode[]
   profile         UserProfile?
   requests        ServiceRequest[]
+  household       HouseholdMember[]
 
   @@index([email])
   @@index([mobile])
@@ -59,6 +60,8 @@ model Task {
   description String
   icon        String
   comingSoon  Boolean  @default(false)
+  kinds       String[] @default([])
+  services    String[] @default([])
   createdAt   DateTime @default(now())
 }
 
@@ -72,6 +75,18 @@ model ServiceRequest {
   urgency   String?
   details   String?
   status    String   @default("submitted")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model HouseholdMember {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  relation  String
+  notes     String?
   createdAt DateTime @default(now())
 
   @@index([userId])

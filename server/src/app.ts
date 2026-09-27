@@ -4,6 +4,7 @@ import { config } from './config/index.js';
 import { authRouter } from './routes/auth.js';
 import { profileRouter } from './routes/profile.js';
 import { taskRouter } from './routes/tasks.js';
+import { householdRouter } from './routes/household.js';
 
 export function buildApp() {
   const app = express();
@@ -16,6 +17,7 @@ export function buildApp() {
   app.use(authRouter);
   app.use(profileRouter);
   app.use(taskRouter);
+  app.use(householdRouter);
 
   // Centralized error handling (must be last)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

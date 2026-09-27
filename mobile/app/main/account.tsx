@@ -44,18 +44,20 @@ export default function Account() {
           ) : null}
         </SectionCard>
 
-        <SectionCard>
-          <View className="flex-row items-center">
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-mint">
-              <Ionicons name="people-outline" size={19} color="#0C5B40" />
+        <Pressable onPress={() => router.push('/main/household')}>
+          <SectionCard>
+            <View className="flex-row items-center">
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-mint">
+                <Ionicons name="people-outline" size={19} color="#0C5B40" />
+              </View>
+              <View className="ml-3 flex-1">
+                <Text className="text-[15px] font-bold text-ink">Household</Text>
+                <Text className="mt-0.5 text-[13px] text-muted">Family members your LM should know about</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </View>
-            <View className="ml-3 flex-1">
-              <Text className="text-[15px] font-bold text-ink">Household</Text>
-              <Text className="mt-0.5 text-[13px] text-muted">Family members your LM should know about</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
-          </View>
-        </SectionCard>
+          </SectionCard>
+        </Pressable>
 
         <SectionCard>
           <Text className="text-[11px] font-semibold uppercase tracking-wide text-muted">Wallet</Text>

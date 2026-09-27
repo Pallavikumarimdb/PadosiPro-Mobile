@@ -1,4 +1,4 @@
-import { get, post, put } from './api';
+import { del, get, post, put } from './api';
 
 export interface User {
   id: string;
@@ -61,4 +61,20 @@ export const taskService = {
   list: () => get<{ ok: boolean; tasks: Category[] }>('/tasks'),
   createRequest: (data: { category: string; service?: string; helpKind?: string; urgency?: string; details?: string }) =>
     post<{ ok: boolean; message: string; request: ServiceRequest }>('/requests', data),
+};
+
+export interface HouseholdMember {
+  id: string;
+  name: string;
+  relation: string;
+  notes?: string | null;
+}
+
+export const RELATIONS = ['Parent', 'Spouse', 'Child', 'Sibling', 'Pet', 'Other'] as const;
+
+export const householdService = {
+  list: () => get<{ ok: boolean; members: HouseholdMember[] }>('/household'),
+  add: (data: { name: string; relation: string; notes?: string }) =>
+    post<{ ok: boolean; member: HouseholdMember }>('/household', data),
+  remove: (id: string) => del<{ ok: boolean }>(`/household/${id}`),
 };

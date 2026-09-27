@@ -8,6 +8,7 @@ export default function MainLayout() {
       <Stack.Screen name="urgency" />
       <Stack.Screen name="request-details" />
       <Stack.Screen name="account" />
+      <Stack.Screen name="household" />
     </Stack>
   );
 }

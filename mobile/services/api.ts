@@ -74,3 +74,5 @@ export const put = <T,>(path: string, data?: unknown) =>
   api<T>(path, { method: 'PUT', body: data ? JSON.stringify(data) : undefined });
 
 export const get = <T,>(path: string) => api<T>(path);
+
+export const del = <T,>(path: string) => api<T>(path, { method: 'DELETE' });

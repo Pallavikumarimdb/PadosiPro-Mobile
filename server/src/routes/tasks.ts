@@ -15,10 +15,9 @@ const requestSchema = z.object({
 });
 
 taskRouter.get('/tasks', async (_req, res) => {
-  const dbTasks = await prisma.task.findMany().catch(() => []);
-  const tasks = dbTasks.length
-    ? dbTasks.map((t: { title: string; description: string; icon: string }) => ({ ...t, kinds: [], services: [] }))
-    : TASKS;
+  const dbTasks = await prisma.task.findMany({ orderBy: { createdAt: 'asc' } }).catch(() => []);
+  // kinds/services now live in Postgres; fall back to the built-in catalog only if the table is empty.
+  const tasks = dbTasks.length ? dbTasks : TASKS;
   return res.json({ ok: true, tasks });
 });
 

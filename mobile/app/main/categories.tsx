@@ -72,6 +72,9 @@ export default function Categories() {
           <ErrorBanner message={error} />
           {tasks.map((t) => {
             const expanded = open === t.title;
+            // Defensive: older API responses may omit these arrays — never crash, just hide the groups.
+            const kindList = t.kinds ?? [];
+            const serviceList = t.services ?? [];
             return (
               <Pressable
                 key={t.title}
@@ -98,11 +101,11 @@ export default function Categories() {
                 </View>
                 {expanded && !t.comingSoon ? (
                   <View className="mt-3">
-                    {t.kinds.length > 0 ? (
+                    {kindList.length > 0 ? (
                       <>
                         <MicroLabel>What kind of help?</MicroLabel>
                         <View className="flex-row flex-wrap">
-                          {t.kinds.map((k) => (
+                          {kindList.map((k) => (
                             <Chip
                               key={k}
                               label={k}
@@ -113,11 +116,11 @@ export default function Categories() {
                         </View>
                       </>
                     ) : null}
-                    {t.services.length > 0 ? (
+                    {serviceList.length > 0 ? (
                       <>
                         <MicroLabel>Choose a service</MicroLabel>
                         <View className="flex-row flex-wrap">
-                          {t.services.map((s) => (
+                          {serviceList.map((s) => (
                             <Chip
                               key={s}
                               label={s}
