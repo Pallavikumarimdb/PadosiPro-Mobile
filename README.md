@@ -32,6 +32,37 @@ PadosiPro connects residents with dedicated Lifestyle Managers (LMs) to handle e
 
 ---
 
+## App Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="25%">
+        <img src="mobile/assets/images/app-ss/home-dashboard.png" alt="Home Dashboard & Requests" width="220" />
+        <br />
+        <sub><b>Home & Requests</b></sub>
+      </td>
+      <td align="center" width="25%">
+        <img src="mobile/assets/images/app-ss/categories-selection.png" alt="Task & Category Selection" width="220" />
+        <br />
+        <sub><b>Category & Service Selection</b></sub>
+      </td>
+      <td align="center" width="25%">
+        <img src="mobile/assets/images/app-ss/urgency-selection.png" alt="Urgency & Timeline" width="220" />
+        <br />
+        <sub><b>Urgency & Timeline</b></sub>
+      </td>
+      <td align="center" width="25%">
+        <img src="mobile/assets/images/app-ss/request-submitted.png" alt="Request Confirmation" width="220" />
+        <br />
+        <sub><b>Leave It With Us (Success)</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## Repository Structure
 
 ```
