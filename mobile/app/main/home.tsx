@@ -15,7 +15,6 @@ function greeting(): string {
   return 'Good evening';
 }
 
-/** Screenshot 5 — Home: greeting, search, popular chips, how it works, LM card. */
 export default function Home() {
   const { user, profile } = useAuth();
   const [tasks, setTasks] = useState<Category[]>([]);

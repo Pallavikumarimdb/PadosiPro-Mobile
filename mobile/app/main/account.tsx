@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { BackButton, DangerOutlineButton, Screen, SectionCard } from '../../components/ui';
 import { useAuth } from '../../store/AuthContext';
 
-/** Screenshot 4 — Account: signed-in info, LM, Household, Wallet, Sign out. */
 export default function Account() {
   const { user, profile, signOut } = useAuth();
 

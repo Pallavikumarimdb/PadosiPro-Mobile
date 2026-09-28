@@ -11,7 +11,6 @@ const OPTIONS = [
   { key: 'Scheduled', sub: 'I have a specific time', icon: 'time-outline' },
 ] as const;
 
-/** Screenshot 9 — "When do you need this?" Shared urgency for all picked tasks. */
 export default function Urgency() {
   const { picks } = useLocalSearchParams<{ picks?: string }>();
   const [picked, setPicked] = useState<string>('Standard');

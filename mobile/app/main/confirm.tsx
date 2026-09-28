@@ -11,7 +11,6 @@ interface Pick {
   service: string;
 }
 
-/** Confirm step: review picks (urgency + details were set on the previous screens), submit all. */
 export default function Confirm() {
   const { picks: rawPicks, urgency, details } = useLocalSearchParams<{
     picks?: string;

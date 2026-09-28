@@ -6,7 +6,6 @@ import { BackButton, Chip, ErrorBanner, MicroLabel, PrimaryButton, Screen } from
 import { taskService, type Category } from '../../services/padosi';
 import { iconFor } from '../../utils/icons';
 
-/** Screenshots 6-8 — Task selection: expandable categories, help-kind + service chips. */
 export default function Categories() {
   const { focus, q } = useLocalSearchParams<{ focus?: string; q?: string }>();
   const [tasks, setTasks] = useState<Category[]>([]);

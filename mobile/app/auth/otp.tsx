@@ -6,7 +6,6 @@ import { authService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
 import { getAndClearDevOtp } from './welcome';
 
-/** Screenshot 1 — Enter OTP: 6-digit input, resend, Verify. */
 export default function Otp() {
   const { email } = useLocalSearchParams<{ email?: string }>();
   const { signInWithToken } = useAuth();

@@ -3,7 +3,6 @@ import { ActivityIndicator, View } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '../store/AuthContext';
 
-/** Startup gate: token -> /me -> onboarding or main; no token -> auth stack. */
 export default function Index() {
   const { status } = useAuth();
 

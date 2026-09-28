@@ -6,7 +6,6 @@ import { authService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
 import { setDevOtp } from './welcome';
 
-/** Login: email/mobile + password. Verified users get a token; unverified go to OTP. */
 export default function Login() {
   const { signInWithToken } = useAuth();
   // Pre-fill email when redirected from register (existing account detected)

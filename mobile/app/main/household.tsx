@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { BackButton, Chip, ErrorBanner, PrimaryButton, Screen, SectionCard } from '../../components/ui';
 import { RELATIONS, householdService, type HouseholdMember } from '../../services/padosi';
 
-/** Household (Account > Household): empty state, add form, member list, delete — all persisted. */
 export default function Household() {
   const [members, setMembers] = useState<HouseholdMember[]>([]);
   const [loading, setLoading] = useState(true);

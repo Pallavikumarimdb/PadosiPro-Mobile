@@ -16,7 +16,6 @@ export function getAndClearDevOtp(): string | undefined {
   return v;
 }
 
-/** Register: mobile + email + password -> OTP verification. */
 export default function Welcome() {
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');

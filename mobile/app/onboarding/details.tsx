@@ -6,7 +6,6 @@ import { validateOnboarding } from '../../utils/validation';
 import { profileService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
 
-/** Screenshots 2-3 — "A few details" onboarding incl. Business Name (assignment requirement). */
 export default function Details() {
   const { refresh, user } = useAuth();
   const scrollRef = useRef<ScrollView>(null);

@@ -11,7 +11,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-/* ---------- BottomBar: bottom CTA area that clears Android's system nav bar ---------- */
 export function BottomBar({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
@@ -24,7 +23,6 @@ export function BottomBar({ children }: { children: ReactNode }) {
   );
 }
 
-/* ---------- Screen: safe-area + consistent horizontal padding ---------- */
 export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
   void scroll;
   return (
@@ -34,7 +32,6 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
   );
 }
 
-/* ---------- Logo ---------- */
 export function Logo({ size = 52 }: { size?: number }) {
   return (
     <View>
@@ -49,7 +46,6 @@ export function Logo({ size = 52 }: { size?: number }) {
   );
 }
 
-/* ---------- Back ---------- */
 export function BackButton({ label = 'Back' }: { label?: string }) {
   return (
     <Pressable onPress={() => router.back()} className="flex-row items-center py-2" hitSlop={12}>
@@ -59,7 +55,6 @@ export function BackButton({ label = 'Back' }: { label?: string }) {
   );
 }
 
-/* ---------- Text field ---------- */
 interface FieldProps extends TextInputProps {
   label: string;
   error?: string;
@@ -97,7 +92,6 @@ export function Field({ label, error, icon, prefix, secureToggle, secureTextEntr
   );
 }
 
-/* ---------- Primary button (bottom CTA) ---------- */
 export function PrimaryButton({
   title,
   onPress,
@@ -130,7 +124,6 @@ export function PrimaryButton({
   );
 }
 
-/* ---------- Secondary / outline danger ---------- */
 export function DangerOutlineButton({ title, onPress }: { title: string; onPress: () => void }) {
   return (
     <Pressable
@@ -143,7 +136,6 @@ export function DangerOutlineButton({ title, onPress }: { title: string; onPress
   );
 }
 
-/* ---------- OTP input (6 boxes, transparent full-area input takes taps directly) ---------- */
 export function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [focused, setFocused] = useState(false);
   const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? '');
@@ -176,7 +168,6 @@ export function OtpInput({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
-/* ---------- Chips ---------- */
 export function Chip({
   label,
   selected,
@@ -203,7 +194,6 @@ export function Chip({
   );
 }
 
-/* ---------- Cards / rows ---------- */
 export function SectionCard({ children }: { children: ReactNode }) {
   return <View className="mb-3 rounded-xl border border-line bg-card p-4">{children}</View>;
 }

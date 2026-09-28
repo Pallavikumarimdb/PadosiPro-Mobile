@@ -3,7 +3,6 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } fro
 import { router, useLocalSearchParams } from 'expo-router';
 import { BackButton, PrimaryButton, Screen } from '../../components/ui';
 
-/** Screenshot 10 — "Tell us a little more." Shared details for all picked tasks. */
 export default function RequestDetails() {
   const { picks: rawPicks, urgency } = useLocalSearchParams<{ picks?: string; urgency?: string }>();
   const { normalizedPicks, count } = useMemo(() => {
