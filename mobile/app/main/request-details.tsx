@@ -8,7 +8,16 @@ export default function RequestDetails() {
   const { picks: rawPicks, urgency } = useLocalSearchParams<{ picks?: string; urgency?: string }>();
   const count = useMemo(() => {
     try {
-      const parsed = JSON.parse(rawPicks ?? '[]') as unknown[];
+      const raw = rawPicks ?? '[]';
+      let decoded = raw;
+      try {
+        let prev = '';
+        while (decoded !== prev && decoded.includes('%')) {
+          prev = decoded;
+          decoded = decodeURIComponent(decoded);
+        }
+      } catch { /* decoded stays as-is */ }
+      const parsed = JSON.parse(decoded) as unknown[];
       return Array.isArray(parsed) ? parsed.length : 0;
     } catch {
       return 0;

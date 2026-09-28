@@ -4,10 +4,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { BackButton, BottomBar, ErrorBanner, Logo, OtpInput, PrimaryButton } from '../../components/ui';
 import { authService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
+import { getAndClearDevOtp } from './welcome';
 
 /** Screenshot 1 — Enter OTP: 6-digit input, resend, Verify. */
 export default function Otp() {
-  const { email, devOtp } = useLocalSearchParams<{ email?: string; devOtp?: string }>();
+  const { email } = useLocalSearchParams<{ email?: string }>();
   const { signInWithToken } = useAuth();
   const [code, setCode] = useState('');
   const [fieldError, setFieldError] = useState<string | undefined>();
@@ -15,7 +16,8 @@ export default function Otp() {
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const [devCode, setDevCode] = useState<string | undefined>(devOtp);
+  // Read dev OTP from module store (not URL params, to avoid nav history exposure)
+  const [devCode, setDevCode] = useState<string | undefined>(getAndClearDevOtp);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {

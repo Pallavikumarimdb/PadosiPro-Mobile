@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { BottomBar, ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
 import { authService } from '../../services/padosi';
 import { useAuth } from '../../store/AuthContext';
+import { setDevOtp } from './welcome';
 
 /** Login: email/mobile + password. Verified users get a token; unverified go to OTP. */
 export default function Login() {
   const { signInWithToken } = useAuth();
-  const [identifier, setIdentifier] = useState('');
+  // Pre-fill email when redirected from register (existing account detected)
+  const { email: prefillEmail } = useLocalSearchParams<{ email?: string }>();
+  const [identifier, setIdentifier] = useState(prefillEmail ?? '');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -33,9 +36,10 @@ export default function Login() {
         // Password was right but the email isn't verified: send a fresh OTP and route there.
         try {
           const otpRes = await authService.sendOtp(verifyEmail);
+          setDevOtp(otpRes.devOtp);  // store out-of-band, not in URL
           router.push({
             pathname: '/auth/otp',
-            params: { email: verifyEmail, devOtp: otpRes.devOtp ?? '', mode: 'login' },
+            params: { email: verifyEmail, mode: 'login' },
           });
         } catch {
           setServerError(e instanceof Error ? e.message : 'Please verify your email first.');

@@ -75,7 +75,6 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-    await loadRequests();
   }
 
   async function loadRequests() {
@@ -92,7 +91,9 @@ export default function Home() {
   }
 
   useEffect(() => {
+    // Run both in parallel — they are independent
     load();
+    loadRequests();
   }, []);
 
   const firstName = (profile?.fullName || '').split(' ')[0] || 'there';

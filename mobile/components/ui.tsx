@@ -208,8 +208,8 @@ export function SectionCard({ children }: { children: ReactNode }) {
   return <View className="mb-3 rounded-xl border border-line bg-card p-4">{children}</View>;
 }
 
-export function MicroLabel({ children }: { children: ReactNode }) {
-  return <Text className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">{children}</Text>;
+export function MicroLabel({ children, style }: { children: ReactNode; style?: object }) {
+  return <Text className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted" style={style}>{children}</Text>;
 }
 
 export function ErrorBanner({ message }: { message: string | null }) {

@@ -16,6 +16,7 @@ export default function Categories() {
   const [kinds, setKinds] = useState<Record<string, string>>({});
   const [picks, setPicks] = useState<{ category: string; helpKind: string; service: string }[]>([]);
   const [query, setQuery] = useState(q ?? '');
+  const [promptKindFor, setPromptKindFor] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -149,7 +150,9 @@ export default function Categories() {
                   <View className="mt-3">
                     {kindList.length > 0 ? (
                       <>
-                        <MicroLabel>What kind of help?</MicroLabel>
+                        <MicroLabel style={promptKindFor === t.title ? { color: '#E53935' } : undefined}>
+                          {promptKindFor === t.title ? '⬆ Pick a kind first' : 'What kind of help?'}
+                        </MicroLabel>
                         <View className="flex-row flex-wrap">
                           {kindList.map((k) => (
                             <Chip
@@ -177,7 +180,12 @@ export default function Categories() {
                                 selected={picked}
                                 onPress={() => {
                                   const kind = kinds[t.title];
-                                  if (!kind) return;
+                                  if (!kind) {
+                                    // Flash the "Pick a kind" prompt
+                                    setPromptKindFor(t.title);
+                                    setTimeout(() => setPromptKindFor(null), 1500);
+                                    return;
+                                  }
                                   setPicks((prev) =>
                                     picked
                                       ? prev.filter((p) => !(p.category === t.title && p.service === s))

@@ -20,7 +20,18 @@ export default function Confirm() {
   }>();
   const initial: Pick[] = useMemo(() => {
     try {
-      const parsed = JSON.parse(rawPicks ?? '[]') as Pick[];
+      const raw = rawPicks ?? '[]';
+      // Expo Router may URL-encode the JSON string across multiple navigation hops
+      // Unwrap all encoding layers (single or double encoded)
+      let decoded = raw;
+      try {
+        let prev = '';
+        while (decoded !== prev && decoded.includes('%')) {
+          prev = decoded;
+          decoded = decodeURIComponent(decoded);
+        }
+      } catch { /* decoded stays as-is */ }
+      const parsed = JSON.parse(decoded) as Pick[];
       return Array.isArray(parsed) ? parsed.filter((p) => p?.category && p?.service) : [];
     } catch {
       return [];

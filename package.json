@@ -16,7 +16,9 @@
     "typecheck:mobile": "npm run typecheck --workspace=mobile",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:seed": "npm run prisma:seed --workspace=server"
+    "db:deploy": "npm run prisma:deploy --workspace=server",
+    "db:seed": "npm run prisma:seed --workspace=server",
+    "db:clean": "npm run db:clean --workspace=server"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

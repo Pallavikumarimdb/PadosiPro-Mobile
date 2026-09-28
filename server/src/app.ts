@@ -9,7 +9,12 @@ import { householdRouter } from './routes/household.js';
 export function buildApp() {
   const app = express();
 
-  app.use(cors());
+  app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : true, // allow all in dev; ALLOWED_ORIGINS must be set in prod
+    credentials: true,
+  }));
   app.use(express.json({ limit: '256kb' }));
 
   app.get('/health', (_req, res) => res.json({ ok: true, service: 'padosipro-server' }));

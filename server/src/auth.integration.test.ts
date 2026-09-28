@@ -85,6 +85,35 @@ describe('auth integration', () => {
     assert.equal(shortPw.status, 400);
   });
 
+  it('allows registration with email and password without mobile, then saves mobile in profile', async () => {
+    const em = email('no-mobile');
+    const r = await api('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email: em, password: 'password-123' }),
+    });
+    assert.equal(r.status, 200);
+    assert.match(r.body.devOtp, /^\d{6}$/);
+
+    const v = await api('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ email: em, code: r.body.devOtp }) });
+    assert.equal(v.status, 200);
+    const token = v.body.token;
+
+    const prof = await api('/profile', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        fullName: 'Jane Doe',
+        mobile: '9876543210',
+        address: 'Bandra West, Mumbai',
+        businessName: 'Acme Studio',
+      }),
+    });
+    assert.equal(prof.status, 200);
+    assert.equal(prof.body.profile.fullName, 'Jane Doe');
+    assert.equal(prof.body.profile.mobile, '9876543210');
+    assert.equal(prof.body.profile.businessName, 'Acme Studio');
+  });
+
   it('verifies a correct OTP and issues a token', async () => {
     const { email: em, devOtp } = await registerUnverified('happy');
     const v = await api('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ email: em, code: devOtp }) });

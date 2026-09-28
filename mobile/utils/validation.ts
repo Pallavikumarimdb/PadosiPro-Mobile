@@ -35,9 +35,16 @@ export function validateWelcome(mobile: string, email: string): { mobile?: strin
   return errors;
 }
 
-export function validateOnboarding(fullName: string, address: string): { fullName?: string; address?: string } {
-  const errors: { fullName?: string; address?: string } = {};
+export function validateOnboarding(
+  fullName: string,
+  address: string,
+  mobile?: string,
+): { fullName?: string; address?: string; mobile?: string } {
+  const errors: { fullName?: string; address?: string; mobile?: string } = {};
   if (fullName.trim().length < 2) errors.fullName = 'Enter your full name to continue.';
+  if (mobile !== undefined && mobile.trim().length > 0) {
+    if (!isValidIndianMobile(mobile)) errors.mobile = 'Enter a valid 10-digit Indian mobile number';
+  }
   if (address.trim().length < 5) errors.address = 'Enter your address & area';
   return errors;
 }

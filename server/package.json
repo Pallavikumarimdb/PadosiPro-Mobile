@@ -10,7 +10,9 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "tsx prisma/seed.ts",
+    "db:clean": "tsx src/scripts/clean-users.ts",
     "test": "tsx --test src/utils/otp.test.ts",
     "test:integration": "tsx --test src/auth.integration.test.ts"
   },

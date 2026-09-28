@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, KeyboardEvent, Platform, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { BottomBar, ErrorBanner, Field, PrimaryButton } from '../../components/ui';
 import { validateOnboarding } from '../../utils/validation';
@@ -8,8 +8,11 @@ import { useAuth } from '../../store/AuthContext';
 
 /** Screenshots 2-3 — "A few details" onboarding incl. Business Name (assignment requirement). */
 export default function Details() {
-  const { refresh } = useAuth();
+  const { refresh, user } = useAuth();
+  const scrollRef = useRef<ScrollView>(null);
+  const businessNameY = useRef<number>(0);
   const [fullName, setFullName] = useState('');
+  const [mobile, setMobile] = useState(user?.mobile ?? '');
   const [address, setAddress] = useState('');
   const [society, setSociety] = useState('');
   const [flatUnit, setFlatUnit] = useState('');
@@ -18,8 +21,27 @@ export default function Details() {
   const [touched, setTouched] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardVisible = keyboardHeight > 0;
 
-  const errors = validateOnboarding(fullName, address);
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e: KeyboardEvent) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const errors = validateOnboarding(fullName, address, mobile);
   const showErrors = touched ? errors : {};
 
   async function onContinue() {
@@ -30,6 +52,7 @@ export default function Details() {
     try {
       await profileService.save({
         fullName: fullName.trim(),
+        mobile: mobile.trim() || undefined,
         address: address.trim(),
         city: 'Mumbai',
         society: society.trim() || null,
@@ -46,9 +69,23 @@ export default function Details() {
     }
   }
 
+  /** Scroll so the business name field is fully visible above the keyboard. */
+  function scrollToBusinessName() {
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: businessNameY.current, animated: true });
+    }, 100);
+  }
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-canvas">
-      <ScrollView className="flex-1 px-5 pt-10" keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 py-6 bg-canvas">
+      <ScrollView
+        ref={scrollRef}
+        className="flex-1 px-5 pt-10"
+        contentContainerStyle={{ paddingBottom: keyboardVisible ? keyboardHeight + 54 : 30 }}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text className="text-[12px] font-bold uppercase tracking-widest text-gold">Mumbai</Text>
         <Text className="mt-2 text-[28px] font-bold text-ink">A few details</Text>
         <Text className="mt-2 text-[15px] leading-6 text-muted">
@@ -62,6 +99,17 @@ export default function Details() {
             value={fullName}
             onChangeText={setFullName}
             error={showErrors.fullName}
+          />
+          <Field
+            label="Mobile number"
+            icon="call-outline"
+            prefix="+91"
+            placeholder="98765 43210"
+            keyboardType="number-pad"
+            maxLength={13}
+            value={mobile.replace(/^(\+91\s*|0)/, '')}
+            onChangeText={(v) => setMobile(v)}
+            error={showErrors.mobile}
           />
           <Field
             label="Address & area"
@@ -96,22 +144,29 @@ export default function Details() {
             textAlignVertical="top"
             style={{ minHeight: 88 }}
           />
-          <Field
-            label="Business name (optional)"
-            placeholder="If this account is for a business"
-            value={businessName}
-            onChangeText={setBusinessName}
-          />
+          <View onLayout={(e) => { businessNameY.current = e.nativeEvent.layout.y; }}>
+            <Field
+              label="Business name (optional)"
+              placeholder="If this account is for a business"
+              value={businessName}
+              onChangeText={setBusinessName}
+              onFocus={scrollToBusinessName}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+          </View>
         </View>
         <ErrorBanner message={serverError} />
-        <View className="h-2" />
+        <View className="h-6" />
       </ScrollView>
-      <BottomBar>
-        {touched && errors.fullName ? (
-          <Text className="mb-2 text-center text-[13px] text-muted">{errors.fullName}</Text>
-        ) : null}
-        <PrimaryButton title="Continue" loading={saving} loadingTitle="Saving..." onPress={onContinue} />
-      </BottomBar>
+      {!keyboardVisible ? (
+        <BottomBar>
+          {touched && errors.fullName ? (
+            <Text className="mb-2 text-center text-[13px] text-muted">{errors.fullName}</Text>
+          ) : null}
+          <PrimaryButton title="Continue" loading={saving} loadingTitle="Saving..." onPress={onContinue} />
+        </BottomBar>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }

@@ -53,7 +53,7 @@ export const authService = {
 
 export const profileService = {
   fetch: () => get<{ ok: boolean; profile: Profile | null }>('/profile'),
-  save: (data: Omit<Profile, 'id' | 'mobile'>) =>
+  save: (data: Partial<Omit<Profile, 'id'>> & { fullName: string; address: string }) =>
     put<{ ok: boolean; message: string; profile: Profile }>('/profile', data),
 };
 

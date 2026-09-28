@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'padosipro.authToken';
 
-export type ApiError = { ok: false; error: string; resendInSeconds?: number; needsVerification?: boolean; email?: string };
+export type ApiError = { ok: false; error: string; resendInSeconds?: number; needsVerification?: boolean; email?: string; shouldLogin?: boolean };
 
 function baseUrl(): string {
   const url = process.env.EXPO_PUBLIC_API_URL;
@@ -59,9 +59,9 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   const body = (await res.json().catch(() => ({}))) as T & ApiError;
   if (!res.ok || (body as ApiError).ok === false) {
-    const err = new Error((body as ApiError).error || `Request failed (${res.status}). Please try again.`);
-    (err as { status?: number; resendInSeconds?: number }).status = res.status;
-    (err as { resendInSeconds?: number }).resendInSeconds = (body as ApiError).resendInSeconds;
+    const apiErr = body as ApiError;
+    const err = new Error(apiErr.error || `Request failed (${res.status}). Please try again.`);
+    Object.assign(err, apiErr, { status: res.status });
     throw err;
   }
   return body;

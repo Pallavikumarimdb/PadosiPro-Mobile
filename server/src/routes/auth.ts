@@ -63,19 +63,51 @@ authRouter.post('/auth/register', async (req, res) => {
   if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues[0].message });
   const cleanEmail = parsed.data.email.trim().toLowerCase();
   if (!isValidEmail(cleanEmail)) return res.status(400).json({ ok: false, error: 'Enter a valid email' });
+
   if (!isValidIndianMobile(parsed.data.mobile)) {
     return res.status(400).json({ ok: false, error: 'Enter a valid 10-digit Indian mobile number' });
   }
   const cleanMobile = normalizeMobile(parsed.data.mobile);
 
-  const clash = await prisma.user.findFirst({ where: { OR: [{ email: cleanEmail }, { mobile: cleanMobile }] } });
-  let user = clash;
-  if (clash && (clash.email !== cleanEmail || clash.mobile !== cleanMobile)) {
-    return res.status(409).json({ ok: false, error: 'This email or mobile number is already registered with a different account.' });
-  }
-  if (!user) user = await prisma.user.create({
-    data: { email: cleanEmail, mobile: cleanMobile, passwordHash: await bcrypt.hash(parsed.data.password, 10) },
+  const clash = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: cleanEmail },
+        ...(cleanMobile ? [{ mobile: cleanMobile }] : []),
+      ],
+    },
   });
+  let user = clash;
+
+  // Email already belongs to a verified account → must log in, not re-register
+  if (clash && clash.email === cleanEmail && clash.emailVerified) {
+    return res.status(409).json({
+      ok: false,
+      error: 'An account with this email already exists. Please log in instead.',
+      shouldLogin: true,
+    });
+  }
+
+  // Mobile number already taken by a *different* account
+  if (clash && cleanMobile && clash.mobile && clash.mobile !== cleanMobile) {
+    return res.status(409).json({ ok: false, error: 'This mobile number is already registered with a different account.' });
+  }
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: cleanEmail,
+        mobile: cleanMobile,
+        passwordHash: await bcrypt.hash(parsed.data.password, 10),
+      },
+    });
+  } else {
+    // Unverified existing account: update password in case they forgot it and are retrying
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await bcrypt.hash(parsed.data.password, 10) },
+    });
+  }
   return issueOtp(user.id, cleanEmail, res);
 });
 
