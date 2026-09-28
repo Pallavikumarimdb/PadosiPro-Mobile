@@ -31,4 +31,4 @@ Payments, chat backend (LM card "Chat" is visual), wallet top-up, push notificat
 
 ## With another week
 
-Wire a real SMTP provider and remove the dev-OTP echo; add refresh-token rotation + server-side logout denylist; request detail/status timeline screens driven by `ServiceRequest.status`; EAS preview APK + a 2–3 min screen recording; load the catalogue from an admin-editable source instead of seed data.
+Wire a real SMTP provider and remove the dev-OTP echo; add refresh-token rotation + server-side logout denylist; request detail/status timeline screens driven by `ServiceRequest.status`; EAS preview APK + a 2-3 min screen recording; load the catalogue from an admin-editable source instead of seed data.

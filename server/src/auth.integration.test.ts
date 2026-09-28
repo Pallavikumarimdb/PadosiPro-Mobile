@@ -85,11 +85,11 @@ describe('auth integration', () => {
     assert.equal(shortPw.status, 400);
   });
 
-  it('allows registration with email and password without mobile, then saves mobile in profile', async () => {
-    const em = email('no-mobile');
+  it('allows registration with email, mobile, and password, then updates profile', async () => {
+    const em = email('happy-reg');
     const r = await api('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email: em, password: 'password-123' }),
+      body: JSON.stringify({ email: em, mobile: nextMobile(), password: 'password-123' }),
     });
     assert.equal(r.status, 200);
     assert.match(r.body.devOtp, /^\d{6}$/);

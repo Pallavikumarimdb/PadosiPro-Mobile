@@ -224,6 +224,22 @@ cd server && TEST_DATABASE_URL="postgresql://padosi:padosi@localhost:5432/padosi
 TEST_DATABASE_URL="postgresql://padosi:padosi@localhost:5432/padosipro_test?schema=public" npm run test:integration
 ```
 
+### Building the Android APK
+
+The project includes a configured `mobile/eas.json` for generating standalone Android APKs via EAS Build:
+
+```sh
+cd mobile
+
+# 1. Log in to Expo (one-time setup)
+npx eas-cli login
+
+# 2. Trigger the cloud APK build
+npx eas-cli build -p android --profile preview
+```
+
+Once the build finishes, EAS provides a direct download link for the installable `.apk` file that can be side-loaded onto any Android phone or emulator.
+
 ### Manual QA Checklist
 
 - [x] **Registration:** Enter fresh email + 10-digit mobile + password -> OTP generated and verified.
