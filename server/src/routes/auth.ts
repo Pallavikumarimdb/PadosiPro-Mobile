@@ -57,7 +57,7 @@ async function issueOtp(userId: string, email: string, res: any, extra?: Record<
   return res.json({ ...payload, ...extra });
 }
 
-// POST /auth/register — create user (or reuse) + send OTP
+// POST /auth/register - create user (or reuse) + send OTP
 authRouter.post('/auth/register', async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues[0].message });
@@ -124,7 +124,7 @@ authRouter.post('/auth/send-otp', async (req, res) => {
   return issueOtp(user.id, email, res);
 });
 
-// POST /auth/verify-otp — marks OTP used, verifies email, returns JWT
+// POST /auth/verify-otp - marks OTP used, verifies email, returns JWT
 authRouter.post('/auth/verify-otp', async (req, res) => {
   const parsed = verifySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues[0].message });
@@ -158,7 +158,7 @@ authRouter.post('/auth/verify-otp', async (req, res) => {
   });
 });
 
-// POST /auth/login — password login for verified users only.
+// POST /auth/login - password login for verified users only.
 // Unverified users get 403 + needsVerification so the app can route them to OTP verification.
 authRouter.post('/auth/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
@@ -194,7 +194,7 @@ authRouter.get('/auth/me', authMiddleware, async (req: AuthRequest, res) => {
   });
 });
 
-// POST /auth/logout — stateless JWT; endpoint exists so client has a server-confirmed sign-out
+// POST /auth/logout - stateless JWT; endpoint exists so client has a server-confirmed sign-out
 authRouter.post('/auth/logout', authMiddleware, async (_req, res) => {
   return res.json({ ok: true, message: 'Signed out. Please discard your token.' });
 });

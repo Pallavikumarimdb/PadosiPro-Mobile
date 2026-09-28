@@ -87,7 +87,7 @@ export default function Household() {
           <BackButton />
           <Text className="mt-2 text-[24px] font-bold text-ink">Household</Text>
           <Text className="mt-1 text-[13px] leading-5 text-muted">
-            Add the people (and pets) in your household so your Lifestyle Manager has the full picture — especially
+            Add the people (and pets) in your household so your Lifestyle Manager has the full picture - especially
             useful if you&apos;re coordinating care from abroad.
           </Text>
         </View>
@@ -148,7 +148,7 @@ export default function Household() {
                   <TextInput
                     value={notes}
                     onChangeText={setNotes}
-                    placeholder="Notes (optional) — e.g. prefers morning appointments"
+                    placeholder="Notes (optional) - e.g. prefers morning appointments"
                     placeholderTextColor="#94A3B8"
                     multiline
                     textAlignVertical="top"

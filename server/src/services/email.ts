@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 
 /**
  * Email abstraction.
- * - SMTP configured (SMTP_HOST set — local Mailpit via docker compose, or any
+ * - SMTP configured (SMTP_HOST set - local Mailpit via docker compose, or any
  *   real provider in production) → send a real email.
  * - Otherwise → log the OTP to the console (take-home development fallback).
  */

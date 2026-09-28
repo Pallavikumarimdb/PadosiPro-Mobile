@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authService.logout();
     } catch {
-      // Best effort — still clear local state.
+      // Best effort - still clear local state.
     }
     await setToken(null);
     setUser(null);

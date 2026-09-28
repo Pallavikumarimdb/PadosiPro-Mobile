@@ -95,7 +95,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // Run both in parallel — they are independent
+    // Run both in parallel - they are independent
     load();
     loadRequests();
   }, []);

@@ -116,7 +116,7 @@ export default function Categories() {
           ) : null}
           {filtered.map((t) => {
             const expanded = open === t.title;
-            // Defensive: older API responses may omit these arrays — never crash, just hide the groups.
+            // Defensive: older API responses may omit these arrays - never crash, just hide the groups.
             const kindList = t.kinds ?? [];
             // Services depend on the selected help-kind (each kind has its own list).
             const selectedKind = kinds[t.title];

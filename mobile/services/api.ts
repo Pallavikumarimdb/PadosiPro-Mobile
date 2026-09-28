@@ -23,7 +23,7 @@ export async function setToken(token: string | null): Promise<void> {
     if (token) await SecureStore.setItemAsync(TOKEN_KEY, token);
     else await SecureStore.deleteItemAsync(TOKEN_KEY);
   } catch {
-    // SecureStore can fail on some emulators — auth simply won't persist.
+    // SecureStore can fail on some emulators - auth simply won't persist.
   }
 }
 
@@ -51,7 +51,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     });
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
-      throw new Error('Request timed out. The backend is not reachable at this address — check the IP/port and retry.');
+      throw new Error('Request timed out. The backend is not reachable at this address - check the IP/port and retry.');
     }
     throw new Error('Cannot reach the server. Check your connection and that the backend is running, then retry.');
   } finally {

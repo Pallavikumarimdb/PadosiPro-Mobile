@@ -12,7 +12,7 @@ export default function Account() {
     router.replace('/auth/welcome');
   }
 
-  const mobile = user?.mobile ? `+91 ${user.mobile}` : '—';
+  const mobile = user?.mobile ? `+91 ${user.mobile}` : '-';
 
   return (
     <Screen>

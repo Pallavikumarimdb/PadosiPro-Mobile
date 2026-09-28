@@ -1,4 +1,4 @@
-# DESIGN.md — PadosiPro take-home
+# DESIGN.md - PadosiPro take-home
 
 ## Architecture
 
@@ -27,7 +27,7 @@ Monorepo (`mobile/`, `server/`, `docker-compose.yml`, npm workspaces):
 
 ## Left out (deliberately)
 
-Payments, chat backend (LM card "Chat" is visual), wallet top-up, push notifications, admin — none in the brief's journey. No refresh-token rotation (30d JWT + SecureStore is enough for a take-home). "Soon" catalogue categories are visible but not selectable, per the reference.
+Payments, chat backend (LM card "Chat" is visual), wallet top-up, push notifications, admin - none in the brief's journey. No refresh-token rotation (30d JWT + SecureStore is enough for a take-home). "Soon" catalogue categories are visible but not selectable, per the reference.
 
 ## With another week
 
