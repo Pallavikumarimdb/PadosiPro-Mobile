@@ -12,5 +12,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: padosipro-mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025' # SMTP — the API sends OTP mail here in development
+      - '8025:8025' # Web UI — open http://localhost:8025 to read OTP emails
+
 volumes:
   pgdata:

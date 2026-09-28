@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { config } from '../config/index.js';
@@ -11,13 +12,17 @@ export const authRouter = Router();
 const registerSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Enter a valid email'),
   mobile: z.string().min(1, 'Mobile number is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 const sendOtpSchema = z.object({ email: z.string().email('Enter a valid email') });
 const verifySchema = z.object({
   email: z.string().email('Enter a valid email'),
   code: z.string().regex(/^\d{6}$/, 'OTP must be exactly 6 digits'),
 });
-const loginSchema = z.object({ identifier: z.string().min(1, 'Enter your email or mobile number') });
+const loginSchema = z.object({
+  identifier: z.string().min(1, 'Enter your email or mobile number'),
+  password: z.string().min(1, 'Enter your password'),
+});
 
 async function issueOtp(userId: string, email: string, res: any, extra?: Record<string, unknown>) {
   const latest = await prisma.otpCode.findFirst({
@@ -68,7 +73,9 @@ authRouter.post('/auth/register', async (req, res) => {
   if (clash && (clash.email !== cleanEmail || clash.mobile !== cleanMobile)) {
     return res.status(409).json({ ok: false, error: 'This email or mobile number is already registered with a different account.' });
   }
-  if (!user) user = await prisma.user.create({ data: { email: cleanEmail, mobile: cleanMobile } });
+  if (!user) user = await prisma.user.create({
+    data: { email: cleanEmail, mobile: cleanMobile, passwordHash: await bcrypt.hash(parsed.data.password, 10) },
+  });
   return issueOtp(user.id, cleanEmail, res);
 });
 
@@ -116,7 +123,8 @@ authRouter.post('/auth/verify-otp', async (req, res) => {
   });
 });
 
-// POST /auth/login — passwordless: look up by email or mobile, then send OTP
+// POST /auth/login — password login for verified users only.
+// Unverified users get 403 + needsVerification so the app can route them to OTP verification.
 authRouter.post('/auth/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues[0].message });
@@ -124,8 +132,20 @@ authRouter.post('/auth/login', async (req, res) => {
   const user = raw.includes('@')
     ? await prisma.user.findUnique({ where: { email: raw } })
     : await prisma.user.findFirst({ where: { mobile: normalizeMobile(raw) } });
-  if (!user) return res.status(404).json({ ok: false, error: 'No account found. Please register first.' });
-  return issueOtp(user.id, user.email, res, { email: user.email });
+  if (!user || !user.passwordHash) return res.status(404).json({ ok: false, error: 'No account found. Please register first.' });
+  const passwordOk = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  if (!passwordOk) return res.status(401).json({ ok: false, error: 'Incorrect password. Please try again.' });
+  if (!user.emailVerified) {
+    return res.status(403).json({ ok: false, error: 'Please verify your email first.', needsVerification: true, email: user.email });
+  }
+  const token = signToken(user.id, user.email);
+  const profile = await prisma.userProfile.findUnique({ where: { userId: user.id } });
+  return res.json({
+    ok: true,
+    token,
+    user: { id: user.id, email: user.email, mobile: user.mobile, emailVerified: user.emailVerified, profileComplete: user.profileComplete },
+    profile,
+  });
 });
 
 // GET /auth/me

@@ -3,7 +3,7 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, Text, TextInput, Vie
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Chip, ErrorBanner, MicroLabel, Screen } from '../../components/ui';
-import { taskService, type Category } from '../../services/padosi';
+import { taskService, type Category, type ServiceRequest } from '../../services/padosi';
 import { searchCatalog, type Suggestion } from '../../services/searchIndex';
 import { useAuth } from '../../store/AuthContext';
 import { iconFor } from '../../utils/icons';
@@ -53,10 +53,16 @@ export default function Home() {
 
   function goToDetails(s: Suggestion) {
     router.push({
-      pathname: '/main/request-details',
-      params: { category: s.category, helpKind: s.helpKind ?? '', service: s.service ?? '' },
+      pathname: '/main/urgency',
+      params: {
+        picks: JSON.stringify([{ category: s.category, helpKind: s.helpKind ?? '', service: s.service ?? '' }]),
+      },
     });
   }
+
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -68,6 +74,20 @@ export default function Home() {
       setError(e instanceof Error ? e.message : 'Could not load services.');
     } finally {
       setLoading(false);
+    }
+    await loadRequests();
+  }
+
+  async function loadRequests() {
+    setRequestsLoading(true);
+    setRequestsError(null);
+    try {
+      const res = await taskService.listRequests();
+      setRequests(res.requests ?? []);
+    } catch (e) {
+      setRequestsError(e instanceof Error ? e.message : 'Could not load your requests.');
+    } finally {
+      setRequestsLoading(false);
     }
   }
 
@@ -208,6 +228,41 @@ export default function Home() {
           <Text className="text-[14px] font-bold text-primary">Browse everything we do</Text>
           <Ionicons name="arrow-forward" size={16} color="#0C5B40" style={{ marginLeft: 6 }} />
         </Pressable>
+
+        <Text className="mb-3 mt-6 text-[12px] font-bold uppercase tracking-widest text-muted">
+          Your requests
+        </Text>
+        {requestsLoading ? (
+          <ActivityIndicator color="#0C5B40" className="my-2" />
+        ) : requestsError ? (
+          <View>
+            <Text className="text-[13px] text-danger">{requestsError}</Text>
+            <Pressable onPress={loadRequests} className="mt-1 self-start" hitSlop={8}>
+              <Text className="text-sm font-semibold text-primary">Retry</Text>
+            </Pressable>
+          </View>
+        ) : requests.length === 0 ? (
+          <View className="rounded-xl border border-line bg-card p-4">
+            <Text className="text-[14px] font-bold text-ink">No requests yet</Text>
+            <Text className="mt-1 text-[13px] text-muted">
+              Pick a service above and your Lifestyle Manager will take it from there.
+            </Text>
+          </View>
+        ) : (
+          requests.slice(0, 5).map((r) => (
+            <View key={r.id} className="mb-3 rounded-xl border border-line bg-card p-4">
+              <View className="flex-row items-center justify-between">
+                <Text className="flex-1 text-[15px] font-bold text-ink">{r.service || r.category}</Text>
+                <View className="rounded-full bg-goldSoft px-2.5 py-1">
+                  <Text className="text-[11px] font-bold text-gold">{r.status}</Text>
+                </View>
+              </View>
+              <Text className="mt-0.5 text-[13px] text-muted">
+                {[r.category, r.helpKind, r.urgency].filter(Boolean).join(' · ')}
+              </Text>
+            </View>
+          ))
+        )}
 
         <Text className="mb-3 mt-6 text-[12px] font-bold uppercase tracking-widest text-muted">
           How PadosiPro works

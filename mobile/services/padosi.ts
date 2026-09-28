@@ -40,13 +40,13 @@ export interface ServiceRequest {
 }
 
 export const authService = {
-  register: (email: string, mobile: string) =>
-    post<{ ok: boolean; message: string; devOtp?: string }>('/auth/register', { email, mobile }),
+  register: (email: string, mobile: string, password: string) =>
+    post<{ ok: boolean; message: string; devOtp?: string }>('/auth/register', { email, mobile, password }),
   sendOtp: (email: string) => post<{ ok: boolean; message: string; devOtp?: string }>('/auth/send-otp', { email }),
   verifyOtp: (email: string, code: string) =>
     post<{ ok: boolean; token: string; user: User; profile: Profile | null }>('/auth/verify-otp', { email, code }),
-  login: (identifier: string) =>
-    post<{ ok: boolean; message: string; devOtp?: string; email?: string }>('/auth/login', { identifier }),
+  login: (identifier: string, password: string) =>
+    post<{ ok: boolean; token: string; user: User; profile: Profile | null }>('/auth/login', { identifier, password }),
   me: () => get<{ ok: boolean; user: User; profile: Profile | null }>('/auth/me'),
   logout: () => post<{ ok: boolean }>('/auth/logout'),
 };
@@ -61,6 +61,7 @@ export const taskService = {
   list: () => get<{ ok: boolean; tasks: Category[] }>('/tasks'),
   createRequest: (data: { category: string; service?: string; helpKind?: string; urgency?: string; details?: string }) =>
     post<{ ok: boolean; message: string; request: ServiceRequest }>('/requests', data),
+  listRequests: () => get<{ ok: boolean; requests: ServiceRequest[] }>('/requests'),
 };
 
 export interface HouseholdMember {

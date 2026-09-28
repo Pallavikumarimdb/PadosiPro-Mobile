@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'padosipro.authToken';
 
-export type ApiError = { ok: false; error: string; resendInSeconds?: number };
+export type ApiError = { ok: false; error: string; resendInSeconds?: number; needsVerification?: boolean; email?: string };
 
 function baseUrl(): string {
   const url = process.env.EXPO_PUBLIC_API_URL;

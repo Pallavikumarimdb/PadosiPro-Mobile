@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -65,9 +65,12 @@ interface FieldProps extends TextInputProps {
   error?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   prefix?: string;
+  /** Shows an eye toggle for password fields. */
+  secureToggle?: boolean;
 }
 
-export function Field({ label, error, icon, prefix, ...rest }: FieldProps) {
+export function Field({ label, error, icon, prefix, secureToggle, secureTextEntry, ...rest }: FieldProps) {
+  const [revealed, setRevealed] = useState(false);
   return (
     <View className="mb-4">
       <Text className="mb-2 text-[13px] font-medium text-muted">{label}</Text>
@@ -80,8 +83,14 @@ export function Field({ label, error, icon, prefix, ...rest }: FieldProps) {
         <TextInput
           className="ml-2 flex-1 py-3 text-[15px] text-ink"
           placeholderTextColor="#94A3B8"
+          secureTextEntry={secureToggle ? !revealed : secureTextEntry}
           {...rest}
         />
+        {secureToggle ? (
+          <Pressable onPress={() => setRevealed((v) => !v)} hitSlop={10} className="p-1">
+            <Ionicons name={revealed ? 'eye-off-outline' : 'eye-outline'} size={19} color="#64748B" />
+          </Pressable>
+        ) : null}
       </View>
       {error ? <Text className="mt-1.5 text-[13px] text-danger">{error}</Text> : null}
     </View>
@@ -134,13 +143,12 @@ export function DangerOutlineButton({ title, onPress }: { title: string; onPress
   );
 }
 
-/* ---------- OTP input (6 boxes, one hidden input) ---------- */
+/* ---------- OTP input (6 boxes, transparent full-area input takes taps directly) ---------- */
 export function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const ref = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
   const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? '');
   return (
-    <Pressable onPress={() => ref.current?.focus()}>
+    <View>
       <View className="flex-row justify-between">
         {digits.map((d, i) => (
           <View
@@ -154,17 +162,17 @@ export function OtpInput({ value, onChange }: { value: string; onChange: (v: str
         ))}
       </View>
       <TextInput
-        ref={ref}
         value={value}
         onChangeText={(v) => onChange(v.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
         maxLength={6}
         autoFocus
+        caretHidden
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        style={{ position: 'absolute', opacity: 0, height: 1, width: 1 }}
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, opacity: 0 }}
       />
-    </Pressable>
+    </View>
   );
 }
 

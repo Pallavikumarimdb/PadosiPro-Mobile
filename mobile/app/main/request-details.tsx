@@ -1,59 +1,26 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BackButton, ErrorBanner, PrimaryButton, Screen } from '../../components/ui';
-import { taskService } from '../../services/padosi';
+import { BackButton, PrimaryButton, Screen } from '../../components/ui';
 
-/** Screenshot 10 — "Tell us a little more" -> persists a service request. */
+/** Screenshot 10 — "Tell us a little more." Shared details for all picked tasks. */
 export default function RequestDetails() {
-  const { category, helpKind, service, urgency } = useLocalSearchParams<{
-    category?: string;
-    helpKind?: string;
-    service?: string;
-    urgency?: string;
-  }>();
-  const [details, setDetails] = useState('');
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
-
-  async function onSubmit() {
-    setSaving(true);
-    setServerError(null);
+  const { picks: rawPicks, urgency } = useLocalSearchParams<{ picks?: string; urgency?: string }>();
+  const count = useMemo(() => {
     try {
-      await taskService.createRequest({
-        category: category ?? '',
-        helpKind: helpKind || undefined,
-        service: service || undefined,
-        urgency: urgency || undefined,
-        details: details.trim() || undefined,
-      });
-      setDone(true);
-    } catch (e) {
-      setServerError(e instanceof Error ? e.message : 'Could not submit. Please try again.');
-    } finally {
-      setSaving(false);
+      const parsed = JSON.parse(rawPicks ?? '[]') as unknown[];
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch {
+      return 0;
     }
-  }
+  }, [rawPicks]);
+  const [details, setDetails] = useState('');
 
-  if (done) {
-    return (
-      <Screen>
-        <View className="flex-1 items-center justify-center px-2">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-mint">
-            <Ionicons name="checkmark" size={30} color="#0C5B40" />
-          </View>
-          <Text className="mt-4 text-center text-[22px] font-bold text-ink">Leave it with us</Text>
-          <Text className="mt-2 text-center text-[14px] leading-6 text-muted">
-            Your Lifestyle Manager will take it from here and keep you posted.
-          </Text>
-        </View>
-        <View className="pb-6">
-          <PrimaryButton title="Back to home" onPress={() => router.replace('/main/home')} />
-        </View>
-      </Screen>
-    );
+  function onNext() {
+    router.push({
+      pathname: '/main/confirm',
+      params: { picks: rawPicks ?? '[]', urgency: urgency ?? 'Standard', details },
+    });
   }
 
   return (
@@ -63,7 +30,7 @@ export default function RequestDetails() {
           <BackButton />
           <View className="mt-3 self-start rounded-full border border-gold/40 bg-goldSoft px-3 py-1.5">
             <Text className="text-[11px] font-semibold text-gold">
-              {[category, service || helpKind].filter(Boolean).join(' · ')}
+              {count} task{count === 1 ? '' : 's'} · {urgency ?? 'Standard'}
             </Text>
           </View>
           <Text className="mt-3 text-[24px] font-bold text-ink">Tell us a little more</Text>
@@ -81,11 +48,10 @@ export default function RequestDetails() {
               placeholderTextColor="#94A3B8"
             />
           </View>
-          <ErrorBanner message={serverError} />
           <View className="mt-2" />
         </ScrollView>
         <View className="pb-6 pt-2">
-          <PrimaryButton title="Leave it with us" loading={saving} loadingTitle="Sending..." onPress={onSubmit} />
+          <PrimaryButton title="Review picks" onPress={onNext} />
         </View>
       </KeyboardAvoidingView>
     </Screen>

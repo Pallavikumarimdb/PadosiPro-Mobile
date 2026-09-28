@@ -14,7 +14,7 @@ export default function Categories() {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [kinds, setKinds] = useState<Record<string, string>>({});
-  const [services, setServices] = useState<Record<string, string>>({});
+  const [picks, setPicks] = useState<{ category: string; helpKind: string; service: string }[]>([]);
   const [query, setQuery] = useState(q ?? '');
 
   async function load() {
@@ -65,23 +65,9 @@ export default function Categories() {
     }
   }, [query, filtered, open]);
 
-  const selection = useMemo(() => {
-    if (!open) return null;
-    const cat = tasks.find((t) => t.title === open);
-    if (!cat) return null;
-    return { category: cat.title, helpKind: kinds[cat.title], service: services[cat.title] };
-  }, [open, tasks, kinds, services]);
-
-  function onContinue() {
-    if (!selection) return;
-    router.push({
-      pathname: '/main/urgency',
-      params: {
-        category: selection.category,
-        helpKind: selection.helpKind ?? '',
-        service: selection.service ?? '',
-      },
-    });
+  function onReview() {
+    if (picks.length === 0) return;
+    router.push({ pathname: '/main/urgency', params: { picks: JSON.stringify(picks) } });
   }
 
   return (
@@ -172,7 +158,6 @@ export default function Categories() {
                               selected={kinds[t.title] === k}
                               onPress={() => {
                                 setKinds((p) => ({ ...p, [t.title]: k }));
-                                setServices((p) => ({ ...p, [t.title]: '' }));
                               }}
                             />
                           ))}
@@ -183,14 +168,25 @@ export default function Categories() {
                       <>
                         <MicroLabel>Choose a service</MicroLabel>
                         <View className="flex-row flex-wrap">
-                          {serviceList.map((s) => (
-                            <Chip
-                              key={s}
-                              label={s}
-                              selected={services[t.title] === s}
-                              onPress={() => setServices((p) => ({ ...p, [t.title]: s }))}
-                            />
-                          ))}
+                          {serviceList.map((s) => {
+                            const picked = picks.some((p) => p.category === t.title && p.service === s);
+                            return (
+                              <Chip
+                                key={s}
+                                label={s}
+                                selected={picked}
+                                onPress={() => {
+                                  const kind = kinds[t.title];
+                                  if (!kind) return;
+                                  setPicks((prev) =>
+                                    picked
+                                      ? prev.filter((p) => !(p.category === t.title && p.service === s))
+                                      : [...prev, { category: t.title, helpKind: kind, service: s }],
+                                  );
+                                }}
+                              />
+                            );
+                          })}
                         </View>
                       </>
                     ) : null}
@@ -203,7 +199,11 @@ export default function Categories() {
         </ScrollView>
       )}
       <View className="pb-6 pt-2">
-        <PrimaryButton title="Continue" disabled={!selection} onPress={onContinue} />
+        <PrimaryButton
+          title={picks.length > 0 ? `Review ${picks.length} pick${picks.length > 1 ? 's' : ''}` : 'Pick services to continue'}
+          disabled={picks.length === 0}
+          onPress={onReview}
+        />
       </View>
     </Screen>
   );

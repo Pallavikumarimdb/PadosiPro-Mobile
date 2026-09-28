@@ -7,6 +7,7 @@ export default function MainLayout() {
       <Stack.Screen name="categories" />
       <Stack.Screen name="urgency" />
       <Stack.Screen name="request-details" />
+      <Stack.Screen name="confirm" />
       <Stack.Screen name="account" />
       <Stack.Screen name="household" />
     </Stack>

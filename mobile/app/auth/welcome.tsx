@@ -2,25 +2,27 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { BottomBar, ErrorBanner, Field, Logo, PrimaryButton } from '../../components/ui';
-import { validateWelcome } from '../../utils/validation';
+import { validateRegister } from '../../utils/validation';
 import { authService } from '../../services/padosi';
 
-/** Screenshot 0 — Welcome / Register: mobile + email -> Get OTP. */
+/** Register: mobile + email + password -> OTP verification. */
 export default function Welcome() {
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<{ mobile?: string; email?: string }>({});
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [errors, setErrors] = useState<{ mobile?: string; email?: string; password?: string; confirm?: string }>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function onGetOtp() {
-    const validation = validateWelcome(mobile, email);
+    const validation = validateRegister(mobile, email, password, confirm);
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
     setLoading(true);
     setServerError(null);
     try {
-      const res = await authService.register(email.trim(), mobile.trim());
+      const res = await authService.register(email.trim(), mobile.trim(), password);
       router.push({
         pathname: '/auth/otp',
         params: { email: email.trim().toLowerCase(), devOtp: res.devOtp ?? '', mode: 'register' },
@@ -32,8 +34,8 @@ export default function Welcome() {
     }
   }
 
-  // Button stays disabled until both fields are valid (matches the muted CTA in the reference).
-  const isFormValid = Object.keys(validateWelcome(mobile, email)).length === 0;
+  // Button stays disabled until all fields are valid (matches the muted CTA in the reference).
+  const isFormValid = Object.keys(validateRegister(mobile, email, password, confirm)).length === 0;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-canvas">
@@ -65,6 +67,26 @@ export default function Welcome() {
             value={email}
             onChangeText={setEmail}
             error={errors.email}
+          />
+          <Field
+            label="Password"
+            icon="lock-closed-outline"
+            placeholder="Minimum 8 characters"
+            secureTextEntry
+            secureToggle
+            value={password}
+            onChangeText={setPassword}
+            error={errors.password}
+          />
+          <Field
+            label="Confirm password"
+            icon="lock-closed-outline"
+            placeholder="Repeat your password"
+            secureTextEntry
+            secureToggle
+            value={confirm}
+            onChangeText={setConfirm}
+            error={errors.confirm}
           />
         </View>
         <ErrorBanner message={serverError} />

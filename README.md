@@ -4,7 +4,7 @@ Native mobile recreation of the PadosiPro reference flow (`/ss` screenshots are 
 
 **Stack:** Expo SDK 57 + TypeScript + Expo Router + NativeWind · Node.js + Express + TypeScript · PostgreSQL + Prisma
 
-**Flow:** Register → OTP → Login → Onboarding → Task selection → Urgency → Details → Account. Returning users skip onboarding.
+**Flow:** Register (email + password) → OTP → Login (verified users) → Onboarding → Task multi-select → Confirm → Home (lists your requests). Returning users skip onboarding.
 
 ```
 mobile/             Expo app (screens in app/, UI kit in components/ui.tsx)
@@ -16,7 +16,7 @@ docker-compose.yml  local PostgreSQL
 
 ```sh
 npm install              # installs mobile + server workspaces
-docker compose up -d     # postgres at localhost:5432
+docker compose up -d     # postgres :5432 + Mailpit :1025 (inbox at :8025)
 
 cd server
 cp .env.example .env
@@ -37,21 +37,29 @@ Or `npm run dev` from root for server + Expo together.
 
 Restart Expo after any `.env` change. Test the path from the phone browser first: `<URL>/health` should return `{"ok":true,...}`.
 
-## Dev OTP (no email provider needed)
+## Email (OTP delivery)
 
-OTPs are random 6-digit, bcrypt-hashed, 10-min expiry, 5 attempts max, 30s resend cooldown, single-use. In development the OTP is logged to the backend console and shown in a gold box on the OTP screen:
+Set `SMTP_HOST` to send real mail — local Mailpit via compose (`SMTP_HOST=localhost`, inbox at http://localhost:8025), or any real SMTP provider in production. Leave `SMTP_HOST` empty to log OTPs to the backend console instead (plus a dev-only gold box on the OTP screen):
 
 ```
 [DEV EMAIL] OTP for you@example.com: 482913 (expires in 10 min)
 ```
 
-QA path: register → OTP → verify → onboarding → save → pick category/service → urgency → details → “Leave it with us” → restart app (session persists) → account → sign out → log in again.
+OTPs are random 6-digit, bcrypt-hashed at rest, 10-min expiry, 5 attempts max, 30s resend cooldown, single-use.
+
+QA path: register → OTP → verify → login → onboarding → save → multi-select services → confirm (urgency + details) → home lists requests → restart app (session persists) → account → household → sign out → log in again.
+
+Business Name is optional: most accounts are individuals/households, so forcing it adds signup friction; the Lifestyle Manager collects it later when relevant.
 
 ## Other commands
 
 ```sh
 npm run typecheck          # tsc for server + mobile
-npm run test:server        # backend unit tests
+npm run test:server        # backend unit tests (no DB)
+# API integration tests (OTP expiry/attempts, login rules) against an isolated DB:
+docker exec padosipro-postgres createdb -U padosi padosipro_test
+cd server && TEST_DATABASE_URL="postgresql://padosi:padosi@localhost:5432/padosipro_test?schema=public" npx prisma migrate deploy
+TEST_DATABASE_URL="postgresql://padosi:padosi@localhost:5432/padosipro_test?schema=public" npm run test:integration
 cd mobile && npx eas-cli@latest build -p android --profile preview   # APK
 ```
 
