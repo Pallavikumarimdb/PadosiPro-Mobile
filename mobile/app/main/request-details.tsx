@@ -6,7 +6,7 @@ import { BackButton, PrimaryButton, Screen } from '../../components/ui';
 /** Screenshot 10 — "Tell us a little more." Shared details for all picked tasks. */
 export default function RequestDetails() {
   const { picks: rawPicks, urgency } = useLocalSearchParams<{ picks?: string; urgency?: string }>();
-  const count = useMemo(() => {
+  const { normalizedPicks, count } = useMemo(() => {
     try {
       const raw = rawPicks ?? '[]';
       let decoded = raw;
@@ -17,10 +17,18 @@ export default function RequestDetails() {
           decoded = decodeURIComponent(decoded);
         }
       } catch { /* decoded stays as-is */ }
-      const parsed = JSON.parse(decoded) as unknown[];
-      return Array.isArray(parsed) ? parsed.length : 0;
+      const parsed = JSON.parse(decoded);
+      if (!Array.isArray(parsed)) return { normalizedPicks: '[]', count: 0 };
+      const normalized = parsed
+        .map((p) => ({
+          category: p?.category || 'General',
+          helpKind: p?.helpKind || '',
+          service: p?.service || p?.phrase || p?.helpKind || p?.category || 'Task',
+        }))
+        .filter((p) => Boolean(p.category && p.service));
+      return { normalizedPicks: JSON.stringify(normalized), count: normalized.length };
     } catch {
-      return 0;
+      return { normalizedPicks: '[]', count: 0 };
     }
   }, [rawPicks]);
   const [details, setDetails] = useState('');
@@ -28,7 +36,7 @@ export default function RequestDetails() {
   function onNext() {
     router.push({
       pathname: '/main/confirm',
-      params: { picks: rawPicks ?? '[]', urgency: urgency ?? 'Standard', details },
+      params: { picks: normalizedPicks, urgency: urgency ?? 'Standard', details },
     });
   }
 

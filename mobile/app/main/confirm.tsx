@@ -31,8 +31,15 @@ export default function Confirm() {
           decoded = decodeURIComponent(decoded);
         }
       } catch { /* decoded stays as-is */ }
-      const parsed = JSON.parse(decoded) as Pick[];
-      return Array.isArray(parsed) ? parsed.filter((p) => p?.category && p?.service) : [];
+      const parsed = JSON.parse(decoded);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((p: any) => ({
+          category: p?.category || 'General',
+          helpKind: p?.helpKind || '',
+          service: p?.service || p?.phrase || p?.helpKind || p?.category || 'Task',
+        }))
+        .filter((p: Pick) => Boolean(p.category && p.service));
     } catch {
       return [];
     }
@@ -97,17 +104,17 @@ export default function Confirm() {
         </Text>
       </View>
       <ScrollView className="mt-4 flex-1" showsVerticalScrollIndicator={false}>
-          {picks.map((p) => (
-            <SectionCard key={`${p.category}|${p.service}`}>
+          {picks.map((p, i) => (
+            <SectionCard key={`${p.category}|${p.service}|${i}`}>
               <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                   <Text className="text-[15px] font-bold text-ink">{p.service}</Text>
                   <Text className="mt-0.5 text-[13px] text-muted">
-                    {[p.category, p.helpKind].filter(Boolean).join(' · ')}
+                    {[p.category, p.helpKind].filter(Boolean).filter((x) => x !== p.service).join(' · ')}
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => setPicks((prev) => prev.filter((x) => !(x.category === p.category && x.service === p.service)))}
+                  onPress={() => setPicks((prev) => prev.filter((_, idx) => idx !== i))}
                   hitSlop={12}
                   className="ml-3 p-1"
                 >

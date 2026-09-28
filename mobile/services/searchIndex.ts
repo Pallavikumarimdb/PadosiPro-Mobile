@@ -21,15 +21,15 @@ const POLICYBAAZAAR_DIY = {
 
 /** Hand-picked phrases (as seen in the reference) mapped to the closest real category. */
 const CURATED: Suggestion[] = [
-  { phrase: 'Travel & stay for guests', category: 'Travel & Tourism', helpKind: 'Book Travel', ...BOOKING_DIY },
-  { phrase: 'Hotel & homestay selection', category: 'Travel & Tourism', helpKind: 'Book Travel', ...BOOKING_DIY },
-  { phrase: 'Event day logistics coordination', category: 'Events & Management', helpKind: 'Weddings' },
-  { phrase: 'Train booking (tatkal, waitlist handling)', category: 'Travel & Tourism', helpKind: 'Book Travel' },
-  { phrase: 'Book train', category: 'Travel & Tourism', helpKind: 'Book Travel' },
-  { phrase: 'Travel insurance coordination', category: 'Travel & Tourism', helpKind: 'Documents & Visa', ...POLICYBAAZAAR_DIY },
-  { phrase: 'Insurance claim coordination', category: 'Insurance & Loans', ...POLICYBAAZAAR_DIY },
-  { phrase: 'Insurance paperwork support', category: 'Insurance & Loans', ...POLICYBAAZAAR_DIY },
-  { phrase: 'Training & instruction coordination', category: 'Education Support' },
+  { phrase: 'Travel & stay for guests', category: 'Travel & Tourism', helpKind: 'Book Travel', service: 'Travel & stay for guests', ...BOOKING_DIY },
+  { phrase: 'Hotel & homestay selection', category: 'Travel & Tourism', helpKind: 'Book Travel', service: 'Hotel & homestay selection', ...BOOKING_DIY },
+  { phrase: 'Event day logistics coordination', category: 'Events & Management', helpKind: 'Weddings', service: 'Event day logistics coordination' },
+  { phrase: 'Train booking (tatkal, waitlist handling)', category: 'Travel & Tourism', helpKind: 'Book Travel', service: 'Train booking (tatkal, waitlist handling)' },
+  { phrase: 'Book train', category: 'Travel & Tourism', helpKind: 'Book Travel', service: 'Book train' },
+  { phrase: 'Travel insurance coordination', category: 'Travel & Tourism', helpKind: 'Documents & Visa', service: 'Travel insurance coordination', ...POLICYBAAZAAR_DIY },
+  { phrase: 'Insurance claim coordination', category: 'Insurance & Loans', helpKind: 'Claims', service: 'Insurance claim coordination', ...POLICYBAAZAAR_DIY },
+  { phrase: 'Insurance paperwork support', category: 'Insurance & Loans', helpKind: 'Paperwork', service: 'Insurance paperwork support', ...POLICYBAAZAAR_DIY },
+  { phrase: 'Training & instruction coordination', category: 'Education Support', helpKind: 'Coaching', service: 'Training & instruction coordination' },
   { phrase: 'Track attendance', category: 'Senior Care', helpKind: 'Check-in', service: 'Daily check-in call' },
 ];
 
@@ -51,7 +51,7 @@ export function searchCatalog(query: string, tasks: Category[]): Suggestion[] {
     for (const k of t.kinds ?? []) {
       if (seen.has(k.toLowerCase())) continue;
       seen.add(k.toLowerCase());
-      pool.push({ phrase: k, category: t.title, helpKind: k });
+      pool.push({ phrase: k, category: t.title, helpKind: k, service: k });
     }
     for (const [kindLabel, services] of Object.entries(t.servicesByKind ?? {})) {
       for (const s of services ?? []) {

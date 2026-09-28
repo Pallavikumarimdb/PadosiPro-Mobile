@@ -69,18 +69,13 @@ authRouter.post('/auth/register', async (req, res) => {
   }
   const cleanMobile = normalizeMobile(parsed.data.mobile);
 
-  const clash = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: cleanEmail },
-        ...(cleanMobile ? [{ mobile: cleanMobile }] : []),
-      ],
-    },
-  });
-  let user = clash;
+  const existingByEmail = await prisma.user.findUnique({ where: { email: cleanEmail } });
+  const existingByMobile = cleanMobile
+    ? await prisma.user.findUnique({ where: { mobile: cleanMobile } })
+    : null;
 
-  // Email already belongs to a verified account → must log in, not re-register
-  if (clash && clash.email === cleanEmail && clash.emailVerified) {
+  // 1. Email already belongs to a verified account → must log in, not re-register
+  if (existingByEmail && existingByEmail.emailVerified) {
     return res.status(409).json({
       ok: false,
       error: 'An account with this email already exists. Please log in instead.',
@@ -88,11 +83,15 @@ authRouter.post('/auth/register', async (req, res) => {
     });
   }
 
-  // Mobile number already taken by a *different* account
-  if (clash && cleanMobile && clash.mobile && clash.mobile !== cleanMobile) {
-    return res.status(409).json({ ok: false, error: 'This mobile number is already registered with a different account.' });
+  // 2. Mobile number already taken by a different account
+  if (existingByMobile && (!existingByEmail || existingByMobile.id !== existingByEmail.id)) {
+    return res.status(409).json({
+      ok: false,
+      error: 'This mobile number is already registered with another account.',
+    });
   }
 
+  let user = existingByEmail;
   if (!user) {
     user = await prisma.user.create({
       data: {
@@ -102,12 +101,16 @@ authRouter.post('/auth/register', async (req, res) => {
       },
     });
   } else {
-    // Unverified existing account: update password in case they forgot it and are retrying
-    await prisma.user.update({
+    // Unverified existing account with same email: update password & mobile
+    user = await prisma.user.update({
       where: { id: user.id },
-      data: { passwordHash: await bcrypt.hash(parsed.data.password, 10) },
+      data: {
+        passwordHash: await bcrypt.hash(parsed.data.password, 10),
+        mobile: cleanMobile,
+      },
     });
   }
+
   return issueOtp(user.id, cleanEmail, res);
 });
 

@@ -52,10 +52,15 @@ export default function Home() {
   }
 
   function goToDetails(s: Suggestion) {
+    const serviceName = s.service || s.phrase || s.helpKind || s.category;
     router.push({
       pathname: '/main/urgency',
       params: {
-        picks: JSON.stringify([{ category: s.category, helpKind: s.helpKind ?? '', service: s.service ?? '' }]),
+        picks: JSON.stringify([{
+          category: s.category,
+          helpKind: s.helpKind ?? '',
+          service: serviceName,
+        }]),
       },
     });
   }
