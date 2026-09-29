@@ -261,7 +261,4 @@ Once the build finishes, EAS provides a direct download link for the installable
 
 ---
 
-## License
-
-This project was developed as a technical evaluation submission and is private to PadosiPro.
 

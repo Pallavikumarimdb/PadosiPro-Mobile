@@ -30,7 +30,12 @@
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
   },
+  "optionalDependencies": {
+    "lightningcss": "1.27.0",
+    "lightningcss-linux-x64-gnu": "1.27.0"
+  },
   "scripts": {
+    "eas-build-post-install": "npm install --no-save lightningcss-linux-x64-gnu@1.27.0",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
